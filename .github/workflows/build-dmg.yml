@@ -25,7 +25,7 @@ jobs:
 
       - name: Build macOS .app package
         run: |
-          pyinstaller --noconsole --onefile main.py
+          pyinstaller --noconsole --onefile daybreak.py
           # Note: PyInstaller creates main.app inside the 'dist' directory
 
       - name: Create DMG Installer
