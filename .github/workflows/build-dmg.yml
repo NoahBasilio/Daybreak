@@ -1,0 +1,50 @@
+name: Build macOS DMG
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install PyInstaller and create-dmg
+        run: |
+          pip install pyinstaller
+          brew install create-dmg
+
+      - name: Build macOS .app package
+        run: |
+          pyinstaller --noconsole --onefile main.py
+          # Note: PyInstaller creates main.app inside the 'dist' directory
+
+      - name: Create DMG Installer
+        run: |
+          mkdir -p dist/dmg
+          cp -r dist/main.app dist/dmg/
+          
+          create-dmg \
+            --volname "My Python App" \
+            --window-size 500 300 \
+            --icon-size 100 \
+            --icon "main.app" 100 150 \
+            --hide-extension "main.app" \
+            --app-drop-link 400 150 \
+            "dist/My-Python-App.dmg" \
+            "dist/dmg/"
+
+      - name: Upload DMG Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: macOS-DMG
+          path: dist/My-Python-App.dmg
